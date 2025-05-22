@@ -1,6 +1,6 @@
 # ConfigPresenter 架构图
 
-## 类关系图
+## 类关系图3
 
 ```mermaid
 classDiagram
