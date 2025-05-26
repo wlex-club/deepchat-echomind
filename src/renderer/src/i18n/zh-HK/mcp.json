@@ -2,7 +2,8 @@
   "tools": {
     "searchPlaceholder": "搜索工具...",
     "noToolsAvailable": "暫無可用工具",
-    "selectTool": "請從左側選擇要調試的工具",
+    "toolList": "工具列表",
+    "functionDescription": "功能描述",
     "path": "路徑",
     "pathPlaceholder": "輸入文件路徑",
     "searchPattern": "搜索模式",
@@ -161,6 +162,18 @@
     "fastGptKnowledge": {
       "name": "FastGPT知識庫檢索",
       "desc": "FastGPT知識庫檢索服務，可以對FastGPT知識庫內容進行檢索"
+    },
+    "deepchat-inmemory/custom-prompts-server": {
+      "desc": "DeepChat內置自定義提示詞服務",
+      "name": "自定義提示詞"
+    },
+    "deepchat-inmemory/deep-research-server": {
+      "desc": "基於博查搜索的DeepChat內置深度研究服務，（注意需要長上下文模型才能使用，上下文不足的模型可能會失敗）",
+      "name": "DeepResearch"
+    },
+    "deepchat-inmemory/auto-prompting-server": {
+      "name": "自動模板提示詞",
+      "desc": "根據用戶輸入自動揀選最合適的自訂提示詞，並智能填寫提示詞模板"
     }
   },
   "prompts": {

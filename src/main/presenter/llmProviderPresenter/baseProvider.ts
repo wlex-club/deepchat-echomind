@@ -59,10 +59,10 @@ export abstract class BaseLLMProvider {
   protected async init() {
     if (this.provider.enable) {
       try {
+        this.isInitialized = true
         await this.fetchModels()
         // 检查是否需要自动启用所有模型
         await this.autoEnableModelsIfNeeded()
-        this.isInitialized = true
         console.info('Provider initialized successfully:', this.provider.name)
       } catch (error) {
         console.warn('Provider initialization failed:', this.provider.name, error)
@@ -110,7 +110,7 @@ export abstract class BaseLLMProvider {
   public async fetchModels(): Promise<MODEL_META[]> {
     try {
       const models = await this.fetchProviderModels()
-      console.log('Fetched models:', models?.length)
+      console.log('Fetched models:', models?.length, this.provider.id)
       this.models = models
       this.configPresenter.setProviderModels(this.provider.id, models)
       return models
@@ -207,6 +207,8 @@ export abstract class BaseLLMProvider {
    * @returns 格式化的提示词
    */
   protected getFunctionCallWrapPrompt(tools: MCPToolDefinition[]): string {
+    const locale = this.configPresenter.getLanguage?.() || 'zh-CN'
+
     return `你具备调用外部工具的能力来协助解决用户的问题
 ====
     可用的工具列表定义在 <tool_list> 标签中：
@@ -323,6 +325,10 @@ ${this.convertToolsToXml(tools)}
 * 根据搜索工具返回的结果…
 * 网页爬取显示…
 * （避免使用“我猜测”之类表述）
+
+#### 8. 语言
+
+用户当前设置的系统语言是${locale},如无特殊情况请用系统设置的语言进行回复。
 
 ---
 注：工具调用指所有外部信息获取操作，包括搜索、网页爬虫、API 查询、插件访问，以及实时与非实时数据的获取、修改与控制等。

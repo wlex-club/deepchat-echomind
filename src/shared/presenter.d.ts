@@ -52,6 +52,10 @@ export interface Prompt {
     required: boolean
   }>
   messages?: Array<{ role: string; content: { text: string } }> // 根据 getPrompt 示例添加
+  enabled?: boolean // 是否启用
+  source?: 'local' | 'imported' | 'builtin' // 来源类型
+  createdAt?: number // 创建时间
+  updatedAt?: number // 更新时间
 }
 export interface PromptListEntry {
   name: string
@@ -132,7 +136,6 @@ export interface IWindowPresenter {
     x?: number
     y?: number
   }): Promise<number | null>
-  getWindow(windowName: string): BrowserWindow | undefined
   mainWindow: BrowserWindow | undefined
   previewFile(filePath: string): void
   minimize(windowId: number): void
@@ -144,6 +147,7 @@ export interface IWindowPresenter {
   isMainWindowFocused(windowId: number): boolean
   sendToAllWindows(channel: string, ...args: unknown[]): void
   sendToWindow(windowId: number, channel: string, ...args: unknown[]): boolean
+  sendTodefaultTab(channel: string, switchToTarget?: boolean, ...args: unknown[]): Promise<boolean>
   closeWindow(windowId: number, forceClose?: boolean): Promise<void>
 }
 
@@ -157,6 +161,22 @@ export interface ITabPresenter {
   moveTab(tabId: number, targetWindowId: number, index?: number): Promise<boolean>
   getWindowTabsData(windowId: number): Promise<Array<TabData>>
   moveTabToNewWindow(tabId: number, screenX?: number, screenY?: number): Promise<boolean>
+  captureTabArea(
+    tabId: number,
+    rect: { x: number; y: number; width: number; height: number }
+  ): Promise<string | null>
+  stitchImagesWithWatermark(
+    imageDataList: string[],
+    options?: {
+      isDark?: boolean
+      version?: string
+      texts?: {
+        brand?: string
+        time?: string
+        tip?: string
+      }
+    }
+  ): Promise<string | null>
 }
 
 export interface TabCreateOptions {
@@ -278,6 +298,7 @@ export interface IConfigPresenter {
   setModelStatus(providerId: string, modelId: string, enabled: boolean): void
   // 语言设置
   getLanguage(): string
+  setLanguage(language: string): void
   getDefaultProviders(): LLM_PROVIDER[]
   // 代理设置
   getProxyMode(): string
@@ -998,7 +1019,7 @@ export interface LLMAgentEventData {
   tool_call_server_description?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tool_call_response_raw?: any
-  tool_call?: 'start' | 'end' | 'error'
+  tool_call?: 'start' | 'running' | 'end' | 'error' | 'update'
   totalUsage?: {
     prompt_tokens: number
     completion_tokens: number

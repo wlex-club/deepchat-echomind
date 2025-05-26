@@ -167,6 +167,7 @@ export class ThreadPresenter implements IThreadPresenter {
     eventBus.emit(STREAM_EVENTS.END, msg)
   }
   async handleLLMAgentResponse(msg: LLMAgentEventData) {
+    const currentTime = Date.now()
     const {
       eventId,
       content,
@@ -188,9 +189,9 @@ export class ThreadPresenter implements IThreadPresenter {
     if (state) {
       // 记录第一个token的时间
       if (state.firstTokenTime === null && (content || reasoning_content)) {
-        state.firstTokenTime = Date.now()
+        state.firstTokenTime = currentTime
         await this.messageManager.updateMessageMetadata(eventId, {
-          firstTokenTime: Date.now() - state.startTime
+          firstTokenTime: currentTime - state.startTime
         })
       }
       if (totalUsage) {
@@ -208,7 +209,7 @@ export class ThreadPresenter implements IThreadPresenter {
           type: 'action',
           content: 'common.error.maximumToolCallsReached',
           status: 'success',
-          timestamp: Date.now(),
+          timestamp: currentTime,
           action_type: 'maximum_tool_calls_reached',
           tool_call: {
             id: tool_call_id,
@@ -229,12 +230,12 @@ export class ThreadPresenter implements IThreadPresenter {
       // 处理reasoning_content的时间戳
       if (reasoning_content) {
         if (state.reasoningStartTime === null) {
-          state.reasoningStartTime = Date.now()
+          state.reasoningStartTime = currentTime
           await this.messageManager.updateMessageMetadata(eventId, {
-            reasoningStartTime: Date.now() - state.startTime
+            reasoningStartTime: currentTime - state.startTime
           })
         }
-        state.lastReasoningTime = Date.now()
+        state.lastReasoningTime = currentTime
       }
 
       const lastBlock = state.message.content[state.message.content.length - 1]
@@ -292,7 +293,7 @@ export class ThreadPresenter implements IThreadPresenter {
               if (existingSearchBlock) {
                 // 如果已经存在搜索块，更新其状态和总数
                 existingSearchBlock.status = 'success'
-                existingSearchBlock.timestamp = Date.now()
+                existingSearchBlock.timestamp = currentTime
                 if (existingSearchBlock.extra) {
                   // 累加搜索结果数量
                   existingSearchBlock.extra.total =
@@ -308,7 +309,7 @@ export class ThreadPresenter implements IThreadPresenter {
                   type: 'search',
                   content: '',
                   status: 'success',
-                  timestamp: Date.now(),
+                  timestamp: currentTime,
                   extra: {
                     total: searchResults.length
                   }
@@ -345,7 +346,7 @@ export class ThreadPresenter implements IThreadPresenter {
             type: 'tool_call',
             content: '',
             status: 'loading',
-            timestamp: Date.now(),
+            timestamp: currentTime,
             tool_call: {
               id: tool_call_id,
               name: tool_call_name,
@@ -355,6 +356,36 @@ export class ThreadPresenter implements IThreadPresenter {
               server_description: tool_call_server_description
             }
           })
+        } else if (tool_call === 'update') {
+          // 更新工具调用参数
+          const toolCallBlock = state.message.content.find(
+            (block) =>
+              block.type === 'tool_call' &&
+              block.tool_call?.id === tool_call_id &&
+              block.status === 'loading'
+          )
+
+          if (toolCallBlock && toolCallBlock.type === 'tool_call' && toolCallBlock.tool_call) {
+            toolCallBlock.tool_call.params = tool_call_params || ''
+          }
+        } else if (tool_call === 'running') {
+          // 工具调用正在执行
+          const toolCallBlock = state.message.content.find(
+            (block) =>
+              block.type === 'tool_call' &&
+              block.tool_call?.id === tool_call_id &&
+              block.status === 'loading'
+          )
+
+          if (toolCallBlock && toolCallBlock.type === 'tool_call') {
+            // 保持 loading 状态，但更新工具信息
+            if (toolCallBlock.tool_call) {
+              toolCallBlock.tool_call.params = tool_call_params || ''
+              toolCallBlock.tool_call.server_name = tool_call_server_name
+              toolCallBlock.tool_call.server_icons = tool_call_server_icons
+              toolCallBlock.tool_call.server_description = tool_call_server_description
+            }
+          }
         } else if (tool_call === 'end' || tool_call === 'error') {
           // 查找对应的工具调用块
           const toolCallBlock = state.message.content.find(
@@ -396,7 +427,7 @@ export class ThreadPresenter implements IThreadPresenter {
           type: 'image',
           content: 'image',
           status: 'success',
-          timestamp: Date.now(),
+          timestamp: currentTime,
           image_data: image_data
         })
       } else if (content) {
@@ -411,7 +442,7 @@ export class ThreadPresenter implements IThreadPresenter {
             type: 'content',
             content: content,
             status: 'loading',
-            timestamp: Date.now()
+            timestamp: currentTime
           })
         }
       }
@@ -420,6 +451,9 @@ export class ThreadPresenter implements IThreadPresenter {
       if (reasoning_content) {
         if (lastBlock && lastBlock.type === 'reasoning_content') {
           lastBlock.content += reasoning_content
+          if (lastBlock.reasoning_time) {
+            lastBlock.reasoning_time.end = currentTime
+          }
         } else {
           if (lastBlock) {
             lastBlock.status = 'success'
@@ -428,7 +462,11 @@ export class ThreadPresenter implements IThreadPresenter {
             type: 'reasoning_content',
             content: reasoning_content,
             status: 'loading',
-            timestamp: Date.now()
+            reasoning_time: {
+              start: currentTime,
+              end: currentTime
+            },
+            timestamp: currentTime
           })
         }
       }
@@ -996,7 +1034,7 @@ export class ThreadPresenter implements IThreadPresenter {
       })
 
       // 如果不需要搜索，直接返回空结果
-      if (optimizedQuery === '无须搜索') {
+      if (optimizedQuery.includes('无须搜索')) {
         searchBlock.status = 'success'
         searchBlock.content = ''
         await this.messageManager.editMessage(messageId, JSON.stringify(state.message.content))
@@ -1138,7 +1176,7 @@ export class ThreadPresenter implements IThreadPresenter {
       this.throwIfCancelled(state.message.id)
 
       // 4. 准备提示内容
-      const { finalContent, promptTokens } = this.preparePromptContent(
+      const { finalContent, promptTokens } = await this.preparePromptContent(
         conversation,
         userContent,
         contextMessages,
@@ -1266,7 +1304,7 @@ export class ThreadPresenter implements IThreadPresenter {
       const { providerId, modelId, temperature, maxTokens } = conversation.settings
       const modelConfig = this.configPresenter.getModelConfig(modelId, providerId)
 
-      const { finalContent, promptTokens } = this.preparePromptContent(
+      const { finalContent, promptTokens } = await this.preparePromptContent(
         conversation,
         'continue',
         contextMessages,
@@ -1296,7 +1334,18 @@ export class ThreadPresenter implements IThreadPresenter {
           tool_call_server_icons: toolCall.server_icons,
           tool_call_server_description: toolCall.server_description
         })
-
+        eventBus.emit(STREAM_EVENTS.RESPONSE, {
+          eventId: state.message.id,
+          content: '',
+          tool_call: 'running',
+          tool_call_id: toolCall.id,
+          tool_call_name: toolCall.name,
+          tool_call_params: toolCall.params,
+          tool_call_response: toolCallResponse.content,
+          tool_call_server_name: toolCall.server_name,
+          tool_call_server_icons: toolCall.server_icons,
+          tool_call_server_description: toolCall.server_description
+        })
         eventBus.emit(STREAM_EVENTS.RESPONSE, {
           eventId: state.message.id,
           content: '',
@@ -1438,7 +1487,7 @@ export class ThreadPresenter implements IThreadPresenter {
   }
 
   // 准备提示内容
-  private preparePromptContent(
+  private async preparePromptContent(
     conversation: CONVERSATION,
     userContent: string,
     contextMessages: Message[],
@@ -1448,10 +1497,10 @@ export class ThreadPresenter implements IThreadPresenter {
     vision: boolean,
     imageFiles: MessageFile[],
     supportsFunctionCall: boolean
-  ): {
+  ): Promise<{
     finalContent: ChatMessage[]
     promptTokens: number
-  } {
+  }> {
     const { systemPrompt, contextLength, artifacts } = conversation.settings
 
     const searchPrompt = searchResults ? generateSearchPrompt(userContent, searchResults) : ''
@@ -1464,9 +1513,14 @@ export class ThreadPresenter implements IThreadPresenter {
     const searchPromptTokens = searchPrompt ? approximateTokenSize(searchPrompt ?? '') : 0
     const systemPromptTokens = systemPrompt ? approximateTokenSize(systemPrompt ?? '') : 0
     const userMessageTokens = approximateTokenSize(userContent + enrichedUserMessage)
-
+    const mcpTools = await presenter.mcpPresenter.getAllToolDefinitions()
+    const mcpToolsTokens = mcpTools.reduce(
+      (acc, tool) => acc + approximateTokenSize(JSON.stringify(tool)),
+      0
+    )
     // 计算剩余可用的上下文长度
-    const reservedTokens = searchPromptTokens + systemPromptTokens + userMessageTokens
+    const reservedTokens =
+      searchPromptTokens + systemPromptTokens + userMessageTokens + mcpToolsTokens
     const remainingContextLength = contextLength - reservedTokens
 
     // 选择合适的上下文消息
@@ -1524,6 +1578,9 @@ export class ThreadPresenter implements IThreadPresenter {
     const selectedMessages: Message[] = []
 
     for (const msg of messages) {
+      if (msg.status !== 'sent') {
+        continue
+      }
       const msgContent = msg.role === 'user' ? (msg.content as UserMessageContent) : null
       const msgText = msgContent
         ? msgContent.text ||
@@ -1551,7 +1608,9 @@ export class ThreadPresenter implements IThreadPresenter {
         break
       }
     }
-
+    while (selectedMessages.length > 0 && selectedMessages[0].role !== 'user') {
+      selectedMessages.shift()
+    }
     return selectedMessages
   }
 
@@ -1649,6 +1708,7 @@ export class ThreadPresenter implements IThreadPresenter {
           })
         } else if (msg.role === 'assistant') {
           // 处理助手消息
+          let afterSearch = false
           const assistantBlocks = msg.content as AssistantMessageBlock[]
           for (const subMsg of assistantBlocks) {
             if (
@@ -1676,11 +1736,18 @@ export class ThreadPresenter implements IThreadPresenter {
                 tool_call_id: subMsg.tool_call.id,
                 content: subMsg.tool_call.response
               })
-            } else if (subMsg.type === 'content' && subMsg?.content?.trim()) {
+            } else if (subMsg.type === 'search') {
+              // 删除强制搜索结果中遗留的[x]引文标记
+              afterSearch = true
+            } else if (subMsg.type === 'content') {
+              // 删除强制搜索结果中遗留的[x]引文标记
+              let content = subMsg.content ?? ''
+              if (afterSearch) content = content.replace(/\[\d+\]/g, '')
               resultMessages.push({
                 role: 'assistant',
-                content: subMsg.content
+                content: content
               })
+              afterSearch = false
             }
           }
         }
@@ -1704,11 +1771,23 @@ export class ThreadPresenter implements IThreadPresenter {
           // 处理助手消息
           const assistantBlocks = msg.content as AssistantMessageBlock[]
           // 提取文本内容块，同时将工具调用的响应内容提取出来
+          let afterSearch = false
           const textContent = assistantBlocks
-            .filter((block) => block.type === 'content' || block.type === 'tool_call')
+            .filter(
+              (block) =>
+                block.type === 'content' || block.type === 'search' || block.type === 'tool_call'
+            )
             .map((block) => {
-              if (block.type === 'content') {
-                return block.content
+              if (block.type === 'search') {
+                // 删除强制搜索结果中遗留的[x]引文标记
+                afterSearch = true
+                return ''
+              } else if (block.type === 'content') {
+                // 删除强制搜索结果中遗留的[x]引文标记
+                let content = block.content ?? ''
+                if (afterSearch) content = content.replace(/\[\d+\]/g, '')
+                afterSearch = false
+                return content
               } else if (
                 block.type === 'tool_call' &&
                 block.tool_call?.response &&
@@ -1799,82 +1878,90 @@ export class ThreadPresenter implements IThreadPresenter {
     }
   }
 
-  // 合并连续的相同角色消息
+  // 合并连续的相同角色的content，但注意assistant下content不能跟tool_calls合并
   private mergeConsecutiveMessages(messages: ChatMessage[]): ChatMessage[] {
-    const mergedMessages: ChatMessage[] = []
-
-    for (let i = 0; i < messages.length; i++) {
-      const currentMessage = messages[i]
-      if (
-        mergedMessages.length > 0 &&
-        mergedMessages[mergedMessages.length - 1].role === currentMessage.role
-      ) {
-        mergedMessages[mergedMessages.length - 1].content = this.mergeMessageContent(
-          currentMessage.content || '',
-          mergedMessages[mergedMessages.length - 1].content || ''
-        )
-      } else {
-        mergedMessages.push({ ...currentMessage })
-      }
+    if (!messages || messages.length === 0) {
+      return []
     }
 
-    return mergedMessages
-  }
+    const mergedResult: ChatMessage[] = []
+    // 为第一条消息创建一个深拷贝并添加到结果数组
+    mergedResult.push(JSON.parse(JSON.stringify(messages[0])))
 
-  private mergeMessageContent(
-    currentMessageContent: string | ChatMessageContent[],
-    previousMessageContent: string | ChatMessageContent[]
-  ) {
-    let mergedContent: ChatMessageContent[] | string
-    if (Array.isArray(currentMessageContent)) {
-      if (Array.isArray(previousMessageContent)) {
-        mergedContent = [
-          ...(previousMessageContent.filter(
-            (item) => item.type !== 'text'
-          ) as ChatMessageContent[]),
-          {
-            type: 'text',
-            text: `${previousMessageContent
-              .filter((item) => item.type === 'text')
-              .map((item) => item.text)
-              .join('\n')}\n${currentMessageContent
-              .filter((item) => item.type === 'text')
-              .map((item) => item.text)
-              .join('\n')}`
-          },
-          ...(currentMessageContent.filter((item) => item.type !== 'text') as ChatMessageContent[])
-        ] as ChatMessageContent[]
-      } else {
-        mergedContent = [
-          {
-            type: 'text',
-            text: `${previousMessageContent}\n${currentMessageContent
-              .filter((item) => item.type === 'text')
-              .map((item) => item.text)
-              .join('\n')}`
-          },
-          ...(currentMessageContent.filter((item) => item.type !== 'text') as ChatMessageContent[])
-        ]
-      }
-    } else {
-      if (Array.isArray(previousMessageContent)) {
-        mergedContent = [
-          ...(previousMessageContent.filter(
-            (item) => item.type !== 'text'
-          ) as ChatMessageContent[]),
-          {
-            type: 'text',
-            text: `${previousMessageContent
-              .filter((item) => item.type == 'text')
-              .map((item) => item.text)
-              .join(`\n`)}\n${currentMessageContent}`
+    for (let i = 1; i < messages.length; i++) {
+      // 为当前消息创建一个深拷贝
+      const currentMessage = JSON.parse(JSON.stringify(messages[i])) as ChatMessage
+      const lastPushedMessage = mergedResult[mergedResult.length - 1]
+
+      let allowMessagePropertiesMerge = false // 标志是否允许消息属性（如content）合并
+
+      // 步骤 1: 判断消息本身是否允许合并（基于role和tool_calls）
+      if (lastPushedMessage.role === currentMessage.role) {
+        if (currentMessage.role === 'assistant') {
+          // Assistant消息: 仅当两条消息都【不】包含tool_calls时，才允许合并
+          if (!lastPushedMessage.tool_calls && !currentMessage.tool_calls) {
+            allowMessagePropertiesMerge = true
           }
-        ] as ChatMessageContent[]
+        } else {
+          // 其他角色 (user, system): 如果role相同，则允许合并
+          allowMessagePropertiesMerge = true
+        }
+      }
+
+      if (allowMessagePropertiesMerge) {
+        // 步骤 2: 如果消息允许合并，尝试合并其 content 字段
+        const LMC = lastPushedMessage.content // 上一条已推送消息的内容
+        const CMC = currentMessage.content // 当前待处理消息的内容
+
+        let newCombinedContent: string | ChatMessageContent[] | undefined = undefined
+        let contentTypesCompatibleForMerging = false
+
+        if (LMC === undefined && CMC === undefined) {
+          newCombinedContent = undefined
+          contentTypesCompatibleForMerging = true
+        } else if (typeof LMC === 'string' && (typeof CMC === 'string' || CMC === undefined)) {
+          // LMC是string, CMC是string或undefined
+          const sLMC = LMC || ''
+          const sCMC = CMC || ''
+          if (sLMC && sCMC) newCombinedContent = `${sLMC}\n${sCMC}`
+          else newCombinedContent = sLMC || sCMC // 保留有内容的一方
+          if (newCombinedContent === '') newCombinedContent = undefined // 空字符串视为undefined
+          contentTypesCompatibleForMerging = true
+        } else if (Array.isArray(LMC) && (Array.isArray(CMC) || CMC === undefined)) {
+          // LMC是数组, CMC是数组或undefined
+          const arrLMC = LMC
+          const arrCMC = CMC || [] // 如果CMC是undefined, 视为空数组进行合并
+          newCombinedContent = [...arrLMC, ...arrCMC]
+          if (newCombinedContent.length === 0) newCombinedContent = undefined // 空数组视为undefined
+          contentTypesCompatibleForMerging = true
+        } else if (LMC === undefined && CMC !== undefined) {
+          // LMC是undefined, CMC有值 (string或array)
+          newCombinedContent = CMC
+          contentTypesCompatibleForMerging = true
+        } else if (LMC !== undefined && CMC === undefined) {
+          // LMC有值, CMC是undefined -> content保持LMC的值，无需改变
+          newCombinedContent = LMC
+          contentTypesCompatibleForMerging = true // 视为成功合并（当前消息内容被“吸收”）
+        }
+        // 如果LMC和CMC的类型不兼容 (例如一个是string, 另一个是array)，
+        // contentTypesCompatibleForMerging 将保持 false
+
+        if (contentTypesCompatibleForMerging) {
+          lastPushedMessage.content = newCombinedContent
+          // currentMessage 被成功合并，不需单独push
+        } else {
+          // 角色和tool_calls条件允许合并，但内容类型不兼容
+          // 因此，不合并消息，将 currentMessage 作为新消息加入
+          mergedResult.push(currentMessage)
+        }
       } else {
-        mergedContent = `${previousMessageContent}\n${currentMessageContent}`
+        // 角色不同，或者 assistant 消息因 tool_calls 而不允许合并
+        // 将 currentMessage 作为新消息加入
+        mergedResult.push(currentMessage)
       }
     }
-    return mergedContent
+
+    return mergedResult
   }
 
   // 更新生成状态
@@ -2091,7 +2178,7 @@ export class ThreadPresenter implements IThreadPresenter {
   async clearAllMessages(conversationId: string): Promise<void> {
     await this.messageManager.clearAllMessages(conversationId)
     // 检查所有 tab 中的活跃会话
-    for (const [_, activeId] of this.activeConversationIds.entries()) {
+    for (const [, activeId] of this.activeConversationIds.entries()) {
       if (activeId === conversationId) {
         // 停止所有正在生成的消息
         await this.stopConversationGeneration(conversationId)

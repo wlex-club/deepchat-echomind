@@ -5,8 +5,8 @@
     class="flex-shrink-0 text-xs font-medium pl-2 pr-1 h-7 mt-0.5 rounded-md flex items-center justify-between transition-all duration-200 group"
     :class="[
       active
-        ? 'bg-background shadow-sm'
-        : 'bg-transparent text-secondary-foreground hover:bg-zinc-500/20 active:bg-zinc-900/20'
+        ? 'bg-white dark:bg-white/10 shadow-sm dark:shadow-[inset_0_0px_1px_0_rgba(255,255,255,0.3)]'
+        : 'bg-transparent text-secondary-foreground hover:bg-black/20 active:bg-zinc-900/20'
     ]"
     @dragstart="onDragStart"
     @click="onClick"
@@ -16,7 +16,7 @@
     </div>
     <button
       class="ml-2 opacity-0 transition-opacity duration-200 rounded-full hover:bg-zinc-500/20 p-0.5"
-      :class="[index > 0 ? 'group-hover:opacity-100' : '']"
+      :class="[size > 1 ? 'group-hover:opacity-100 ' : 'pointer-events-none cursor-default']"
       @click.stop="onClose"
     >
       <Icon icon="lucide:x" class="w-3 h-3" />
@@ -35,7 +35,7 @@ const emit = defineEmits<{
   (e: 'dragstart', event: DragEvent): void
 }>()
 
-const props = defineProps<{
+defineProps<{
   active: boolean
   size: number
   index: number
@@ -52,9 +52,7 @@ const onClick = () => {
 }
 
 const onClose = () => {
-  if (props.index > 0) {
-    emit('close')
-  }
+  emit('close')
 }
 
 const onDragStart = (event: DragEvent) => {

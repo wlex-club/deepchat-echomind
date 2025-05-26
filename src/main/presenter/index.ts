@@ -65,7 +65,8 @@ const eventsToForward: string[] = [
   SHORTCUT_EVENTS.CLEAN_CHAT_HISTORY,
   SHORTCUT_EVENTS.ZOOM_IN,
   SHORTCUT_EVENTS.ZOOM_OUT,
-  SHORTCUT_EVENTS.ZOOM_RESUME
+  SHORTCUT_EVENTS.ZOOM_RESUME,
+  CONFIG_EVENTS.LANGUAGE_CHANGED
 ]
 export class Presenter implements IPresenter {
   windowPresenter: WindowPresenter
@@ -140,6 +141,14 @@ export class Presenter implements IPresenter {
           const [msg] = payload
           console.log(eventName, msg) // 记录日志
           this.windowPresenter.sendToAllWindows(eventName, msg)
+        } else if (
+          eventName === DEEPLINK_EVENTS.MCP_INSTALL ||
+          eventName === DEEPLINK_EVENTS.START
+        ) {
+          // 特殊处理：向默认标签页发送消息，并切换到目标标签页
+          const [msg] = payload
+          console.log(eventName, msg) // 记录日志
+          this.windowPresenter.sendTodefaultTab(eventName, true, msg)
         } else {
           // 默认处理：直接转发所有 payload
           this.windowPresenter.sendToAllWindows(eventName, ...payload)
@@ -157,9 +166,6 @@ export class Presenter implements IPresenter {
   }
 
   init() {
-    if (this.windowPresenter.mainWindow) {
-      // this.llamaCppPresenter.setMainwindow(this.windowPresenter.mainWindow)
-    }
     // 持久化 LLMProviderPresenter 的 Providers 数据
     const providers = this.configPresenter.getProviders()
     this.llmproviderPresenter.setProviders(providers)

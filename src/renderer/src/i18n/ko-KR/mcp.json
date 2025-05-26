@@ -95,7 +95,8 @@
   "tools": {
     "searchPlaceholder": "도구 검색...",
     "noToolsAvailable": "사용 가능한 도구 없음",
-    "selectTool": "왼쪽에서 디버깅할 도구를 선택하세요",
+    "toolList": "도구 목록",
+    "functionDescription": "기능 설명",
     "path": "경로",
     "pathPlaceholder": "파일 경로 입력",
     "searchPattern": "검색 패턴",
@@ -161,6 +162,18 @@
     "fastGptKnowledge": {
       "name": "FastGPT 지식 베이스 검색",
       "desc": "FastGPT 지식 베이스 검색 서비스, FastGPT 지식 베이스 콘텐츠를 검색할 수 있습니다"
+    },
+    "deepchat-inmemory/custom-prompts-server": {
+      "desc": "DeepChat 내장 사용자 정의 프롬프트 단어 서비스",
+      "name": "사용자 정의 프롬프트 단어"
+    },
+    "deepchat-inmemory/deep-research-server": {
+      "desc": "Bocha 검색을 기반으로 한 DeepChat 내장 내장 연구 서비스 (긴 컨텍스트 모델을 사용해야하고 컨텍스트가 불충분 한 모델이 실패 할 수 있습니다)",
+      "name": "DeepResearch"
+    },
+    "deepchat-inmemory/auto-prompting-server": {
+      "name": "자동 템플릿 프롬프트",
+      "desc": "사용자 입력을 기반으로 가장 적합한 사용자 정의 프롬프트를 자동으로 선택하고, 프롬프트 템플릿을 지능적으로 채웁니다."
     }
   },
   "prompts": {

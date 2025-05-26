@@ -223,6 +223,7 @@
       "resources": "リソース"
     },
     "serverList": "サーバーリスト",
+    "totalServers": "サーバー総数",
     "addServer": "サーバーを追加",
     "running": "実行中",
     "stopped": "停止中",
@@ -301,7 +302,8 @@
     "default": "デフォルト",
     "setAsDefault": "デフォルトに設定",
     "removeServer": "サーバーを削除",
-    "confirmRemoveServer": "サーバー {name} を削除してもよろしいですか？この操作は取り消せません。",
+    "autoStart": "自動起動",
+    "confirmRemoveServer": "サーバー {name} を削除してもよろしいですか？この操作は元に戻せません。",
     "removeServerDialog": {
       "title": "サーバーを削除"
     },
@@ -324,7 +326,14 @@
     "marketplace": "MCPマーケットに移動し、ワンクリックでインストールします",
     "maxDefaultServersReached": "せいぜい3つのデフォルトサーバーのみを設定できます",
     "removeDefaultFirst": "最初にいくつかのデフォルトサーバーを削除してください",
-    "higressMarket": "Higress MCPのインストールに移動します"
+    "higressMarket": "Higress MCPのインストールに移動します",
+    "technicalDetails": "技術的詳細",
+    "httpServer": "HTTPサーバー",
+    "localProcess": "ローカルプロセス",
+    "restartServer": "サーバーを再起動",
+    "viewLogs": "ログを表示",
+    "starting": "起動中",
+    "error": "エラー"
   },
   "about": {
     "title": "私たちについて",
@@ -352,6 +361,10 @@
     "closeTab": "現在のタブページを閉じます",
     "newTab": "新しいタブを作成します",
     "newWindow": "新しいウィンドウを開きます",
-    "newConversation": "新しい会話"
+    "newConversation": "新しい会話",
+    "lastTab": "最後のタブに切り替えます",
+    "nextTab": "次のタブに切り替えます",
+    "previousTab": "前のタブに切り替えます",
+    "specificTab": "指定されたタブページ（1-8）に切り替える"
   }
 }

@@ -39,7 +39,7 @@
             @dragstart="onTabDragStart(tab.id, $event)"
           >
             <img src="@/assets/logo.png" class="w-4 h-4 mr-2 rounded-sm" />
-            {{ tab.title ?? 'DeepChat' }}
+            <span class="truncate">{{ tab.title ?? 'DeepChat' }}</span>
           </AppBarTabItem>
           <div ref="endOfTabs" class="w-0 flex-shrink-0 h-full"></div>
         </div>
@@ -312,11 +312,20 @@ const closeWindow = () => {
 }
 
 const openSettings = () => {
-  tabStore.addTab({
-    name: 'Settings',
-    icon: 'lucide:settings',
-    viewType: 'settings'
-  })
+  // 检查是否已经存在设置标签页
+  const existingSettingsTab = tabStore.tabs.find((tab) => tab.url.includes('#/settings'))
+
+  if (existingSettingsTab) {
+    // 如果已经存在设置标签页，切换到该标签页
+    tabStore.setCurrentTabId(existingSettingsTab.id)
+  } else {
+    // 如果不存在设置标签页，创建新的
+    tabStore.addTab({
+      name: 'Settings',
+      icon: 'lucide:settings',
+      viewType: 'settings'
+    })
+  }
 }
 </script>
 
@@ -335,20 +344,25 @@ button {
 
 /* For Webkit-based browsers (Chrome, Safari, newer versions of Edge) */
 .overflow-x-auto::-webkit-scrollbar {
-  height: 4px; /* Adjust as needed for thickness */
+  height: 4px;
+  /* Adjust as needed for thickness */
 }
 
 .overflow-x-auto::-webkit-scrollbar-track {
-  background: transparent; /* Or a very subtle color like #f1f1f1 or theme background */
+  background: transparent;
+  /* Or a very subtle color like #f1f1f1 or theme background */
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb {
-  background: #a1a1aa; /* Scrollbar thumb color - zinc-400 */
-  border-radius: 2px; /* Rounded corners for the thumb */
+  background: #a1a1aa;
+  /* Scrollbar thumb color - zinc-400 */
+  border-radius: 2px;
+  /* Rounded corners for the thumb */
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: #71717a; /* Scrollbar thumb color on hover - zinc-500 */
+  background: #71717a;
+  /* Scrollbar thumb color on hover - zinc-500 */
 }
 
 /* For Firefox - already handled by inline style for simplicity, can also be moved here */
