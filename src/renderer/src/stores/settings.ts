@@ -200,16 +200,14 @@ export const useSettingsStore = defineStore('settings', () => {
         name: 'settings'
       })
       await router.push({
-        name: 'settings-mcp',
-        query: { subtab: 'servers' } // 确保激活服务器子标签
+        name: 'settings-mcp'
       })
     } else {
       await router.replace({
         name: 'settings-mcp',
         query: {
-          ...currentRoute.query,
-          subtab: 'servers'
-        } // 确保激活服务器子标签
+          ...currentRoute.query
+        }
       })
       // 如果已经在MCP设置页面，只更新子标签页
     }
@@ -337,10 +335,13 @@ export const useSettingsStore = defineStore('settings', () => {
     try {
       // 获取自定义模型列表
       const customModelsList = await llmP.getCustomModels(providerId)
+      
+      // 如果customModelsList为null或undefined，使用空数组
+      const safeCustomModelsList = customModelsList || []
 
       // 获取自定义模型状态并合并
       const customModelsWithStatus = await Promise.all(
-        customModelsList.map(async (model) => {
+        safeCustomModelsList.map(async (model) => {
           // 获取模型状态
           const enabled = await configP.getModelStatus(providerId, model.id)
           return {
@@ -1378,6 +1379,15 @@ export const useSettingsStore = defineStore('settings', () => {
     )
   }
 
+  // 默认系统提示词相关方法
+  const getDefaultSystemPrompt = async (): Promise<string> => {
+    return await configP.getDefaultSystemPrompt()
+  }
+
+  const setDefaultSystemPrompt = async (prompt: string): Promise<void> => {
+    await configP.setDefaultSystemPrompt(prompt)
+  }
+
   return {
     providers,
     theme,
@@ -1454,6 +1464,8 @@ export const useSettingsStore = defineStore('settings', () => {
     getAzureApiVersion,
     setGeminiSafety,
     getGeminiSafety,
+    getDefaultSystemPrompt,
+    setDefaultSystemPrompt,
     setupProviderListener
   }
 })
