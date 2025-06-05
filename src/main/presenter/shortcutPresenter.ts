@@ -91,12 +91,21 @@ export class ShortcutPresenter {
 
     // Command+, 或 Ctrl+, 打开设置
     globalShortcut.register(this.shortcutKeys.GoSettings, () => {
-      eventBus.emit(SHORTCUT_EVENTS.GO_SETTINGS)
+      const focusedWindow = presenter.windowPresenter.getFocusedWindow()
+      if (focusedWindow?.isFocused()) {
+        presenter.windowPresenter.sendToActiveTab(focusedWindow.id, SHORTCUT_EVENTS.GO_SETTINGS)
+      }
     })
 
     // Command+L 或 Ctrl+L 清除聊天历史
     globalShortcut.register(this.shortcutKeys.CleanChatHistory, () => {
-      eventBus.emit(SHORTCUT_EVENTS.CLEAN_CHAT_HISTORY)
+      const focusedWindow = presenter.windowPresenter.getFocusedWindow()
+      if (focusedWindow?.isFocused()) {
+        presenter.windowPresenter.sendToActiveTab(
+          focusedWindow.id,
+          SHORTCUT_EVENTS.CLEAN_CHAT_HISTORY
+        )
+      }
     })
 
     // 添加标签页切换相关快捷键
