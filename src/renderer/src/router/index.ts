@@ -117,6 +117,15 @@ const router = createRouter({
           }
         }
       ]
+    },
+    {
+      path: '/discovery',
+      name: 'discovery',
+      component: () => import('@/views/ai-video-tutor/index.vue'),
+      meta: {
+        titleKey: 'routes.discovery',
+        icon: 'lucide:flask-conical'
+      }
     }
   ]
 })

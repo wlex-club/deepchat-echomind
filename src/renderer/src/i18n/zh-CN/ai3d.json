@@ -1,0 +1,111 @@
+{
+  "title": "AI 3D模型生成器",
+  "subtitle": "用人工智能将创意转化为精美的3D模型",
+  "generator": {
+    "title": "3D模型生成器",
+    "prompt": {
+      "label": "描述您的模型",
+      "placeholder": "描述您想要创建的3D模型（例如：现代椅子、未来跑车、风格化角色...）",
+      "examples": "示例"
+    },
+    "style": {
+      "label": "风格",
+      "realistic": "写实",
+      "stylized": "风格化",
+      "lowPoly": "低面数",
+      "minimalist": "极简",
+      "industrial": "工业",
+      "organic": "有机"
+    },
+    "quality": {
+      "label": "质量",
+      "draft": "草图",
+      "standard": "标准",
+      "high": "高清",
+      "ultra": "超高清"
+    },
+    "format": {
+      "label": "输出格式",
+      "glb": "GLB（推荐）",
+      "obj": "OBJ",
+      "fbx": "FBX",
+      "usd": "USD"
+    },
+    "generate": "生成3D模型",
+    "generating": "生成中...",
+    "regenerate": "重新生成"
+  },
+  "viewer": {
+    "title": "3D查看器",
+    "rendererTitle": "3D模型渲染器",
+    "holographic": "裸眼3D查看",
+    "normalView": "普通视图",
+    "fullscreen": "全屏",
+    "download": "下载",
+    "share": "分享",
+    "edit": "编辑",
+    "loading": "加载中...",
+    "loadError": "加载失败",
+    "loadErrorDesc": "无法加载3D模型文件",
+    "retry": "重试加载",
+    "loadExample": "加载示例模型",
+    "networkError": "网络连接已断开",
+    "fileNotFound": "模型文件不存在",
+    "unsupportedFormat": "不支持的文件格式",
+    "controls": {
+      "rotate": "旋转",
+      "zoom": "缩放",
+      "pan": "平移",
+      "reset": "重置视角"
+    },
+    "lighting": {
+      "title": "光照",
+      "studio": "工作室",
+      "outdoor": "户外",
+      "soft": "柔光",
+      "dramatic": "戏剧性"
+    },
+    "materials": {
+      "title": "材质",
+      "metal": "金属",
+      "plastic": "塑料",
+      "wood": "木材",
+      "glass": "玻璃",
+      "ceramic": "陶瓷",
+      "fabric": "织物"
+    }
+  },
+  "gallery": {
+    "title": "我的创作",
+    "recent": "最近",
+    "favorites": "收藏",
+    "shared": "已分享",
+    "empty": "暂无模型",
+    "emptySubtext": "创建您的第一个3D模型开始使用"
+  },
+  "examples": [
+    "符合人体工程学设计的时尚现代办公椅",
+    "带LED灯光的未来跑车",
+    "极简木质咖啡桌",
+    "蒸汽朋克机械时钟",
+    "有机树雕塑",
+    "带RGB灯效的游戏耳机"
+  ],
+  "features": {
+    "aiPowered": "AI驱动生成",
+    "holographicView": "裸眼3D显示",
+    "realtime": "实时预览",
+    "multiFormat": "多种格式",
+    "cloudSync": "云端同步",
+    "collaboration": "团队协作"
+  },
+  "pricing": {
+    "free": "免费版",
+    "pro": "专业版",
+    "enterprise": "企业版",
+    "upgrade": "升级套餐"
+  },
+  "controls": "左键：旋转，右键：平移，滚轮：缩放",
+  "loadError": "模型加载失败",
+  "retry": "重试"
+} 

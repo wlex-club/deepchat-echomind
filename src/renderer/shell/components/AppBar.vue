@@ -70,6 +70,14 @@
       >
         <Icon icon="lucide:settings" class="w-4 h-4" />
       </Button>
+      <Button
+        variant="ghost"
+        class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center hover:bg-zinc-500/20"
+        @click="openDiscovery"
+        :title="t('routes.discovery')"
+      >
+        <Icon icon="lucide:flask-conical" class="w-4 h-4" />
+      </Button>
       <!-- <Button
         class="text-xs font-medium px-2 h-7 bg-transparent rounded-md flex items-center justify-center"
         @click="openNewWindow"
@@ -115,6 +123,8 @@ import AppBarTabItem from './app-bar/AppBarTabItem.vue'
 import { useTabStore } from '@shell/stores/tab'
 import { useThemeStore } from '@/stores/theme'
 import { useElementSize } from '@vueuse/core'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 const tabStore = useTabStore()
 const windowPresenter = usePresenter('windowPresenter')
 const devicePresenter = usePresenter('devicePresenter')
@@ -136,6 +146,9 @@ let draggedTabId: number | null = null
 const tabContainerWrapperSize = useElementSize(tabContainerWrapper)
 const tabContainerSize = useElementSize(tabContainer)
 const tabContainerWrapperScrollLeft = ref(0)
+
+const router = useRouter()
+const { t } = useI18n()
 
 const onTabContainerWrapperScroll = () => {
   requestAnimationFrame(() => {
@@ -324,6 +337,19 @@ const openSettings = () => {
       name: 'Settings',
       icon: 'lucide:settings',
       viewType: 'settings'
+    })
+  }
+}
+
+const openDiscovery = (): void => {
+  const existingDiscoveryTab = tabStore.tabs.find(tab => tab.url.includes('#/discovery'))
+  if (existingDiscoveryTab) {
+    tabStore.setCurrentTabId(existingDiscoveryTab.id)
+  } else {
+    tabStore.addTab({
+      name: t('routes.discovery'),
+      icon: 'lucide:flask-conical',
+      viewType: 'discovery'
     })
   }
 }

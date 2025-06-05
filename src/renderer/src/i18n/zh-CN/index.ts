@@ -16,6 +16,8 @@ import newThread from './newThread.json'
 import about from './about.json'
 import contextMenu from './contextMenu.json'
 import promptSetting from './promptSetting.json'
+import aiVideoTutor from './aiVideoTutor.json'
+import ai3d from './ai3d.json'
 
 // 单独的顶层键
 const others = {
@@ -51,5 +53,7 @@ export default {
   about,
   contextMenu,
   promptSetting,
+  aiVideoTutor,
+  ai3d,
   ...others
 }

@@ -125,7 +125,7 @@ export class TabPresenter implements ITabPresenter {
     this.tabs.set(tabId, view)
     this.tabState.set(tabId, {
       id: tabId,
-      title: url,
+      title: options.name ?? url,
       isActive: options.active ?? true,
       url: url,
       closable: true,

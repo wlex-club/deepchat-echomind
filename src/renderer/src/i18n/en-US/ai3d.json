@@ -1,0 +1,103 @@
+{
+  "title": "AI 3D Model Generator",
+  "subtitle": "Transform your ideas into stunning 3D models with AI",
+  "generator": {
+    "title": "3D Model Generator",
+    "prompt": {
+      "label": "Describe your model",
+      "placeholder": "Describe the 3D model you want to create (e.g., modern chair, futuristic car, stylized character...)",
+      "examples": "Examples"
+    },
+    "style": {
+      "label": "Style",
+      "realistic": "Realistic",
+      "stylized": "Stylized",
+      "lowPoly": "Low Poly",
+      "minimalist": "Minimalist",
+      "industrial": "Industrial",
+      "organic": "Organic"
+    },
+    "quality": {
+      "label": "Quality",
+      "draft": "Draft",
+      "standard": "Standard",
+      "high": "High",
+      "ultra": "Ultra"
+    },
+    "format": {
+      "label": "Output Format",
+      "glb": "GLB (Recommended)",
+      "obj": "OBJ",
+      "fbx": "FBX",
+      "usd": "USD"
+    },
+    "generate": "Generate 3D Model",
+    "generating": "Generating...",
+    "regenerate": "Regenerate"
+  },
+  "viewer": {
+    "title": "3D Viewer",
+    "rendererTitle": "3D Model Renderer",
+    "holographic": "Holographic View",
+    "normalView": "Normal View",
+    "fullscreen": "Fullscreen",
+    "download": "Download",
+    "share": "Share",
+    "edit": "Edit",
+    "controls": {
+      "rotate": "Rotate",
+      "zoom": "Zoom", 
+      "pan": "Pan",
+      "reset": "Reset View"
+    },
+    "lighting": {
+      "title": "Lighting",
+      "studio": "Studio",
+      "outdoor": "Outdoor",
+      "soft": "Soft",
+      "dramatic": "Dramatic"
+    },
+    "materials": {
+      "title": "Materials",
+      "metal": "Metal",
+      "plastic": "Plastic",
+      "wood": "Wood",
+      "glass": "Glass",
+      "ceramic": "Ceramic",
+      "fabric": "Fabric"
+    }
+  },
+  "gallery": {
+    "title": "My Creations",
+    "recent": "Recent",
+    "favorites": "Favorites",
+    "shared": "Shared",
+    "empty": "No models yet",
+    "emptySubtext": "Create your first 3D model to get started"
+  },
+  "examples": [
+    "A sleek modern office chair with ergonomic design",
+    "Futuristic sports car with LED lighting",
+    "Minimalist wooden coffee table",
+    "Steampunk mechanical clock",
+    "Organic tree sculpture",
+    "Gaming headset with RGB lighting"
+  ],
+  "features": {
+    "aiPowered": "AI-Powered Generation",
+    "holographicView": "Holographic Display",
+    "realtime": "Real-time Preview",
+    "multiFormat": "Multiple Formats",
+    "cloudSync": "Cloud Sync",
+    "collaboration": "Team Collaboration"
+  },
+  "pricing": {
+    "free": "Free",
+    "pro": "Pro",
+    "enterprise": "Enterprise",
+    "upgrade": "Upgrade Plan"
+  },
+  "controls": "Left click: rotate, Right click: pan, Scroll: zoom",
+  "loadError": "Failed to load model",
+  "retry": "Retry"
+} 
